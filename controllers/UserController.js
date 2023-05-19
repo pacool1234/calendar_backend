@@ -182,38 +182,6 @@ const UserController = {
     try {
       const userId = new mongoose.Types.ObjectId(req.user._id);
       const user = await User.findByIdAndDelete({ _id: userId });
-      // Delete _id from other users followers array
-      await User.updateMany(
-        { followers: userId },
-        { $pull: { followers: userId } }
-      );
-
-      // Delete _id from other users following array
-      await User.updateMany(
-        { following: userId },
-        { $pull: { following: userId } }
-      );
-
-      // Delete all posts made by the user
-      await Post.deleteMany({ userId: userId });
-
-      // Delete all likes from posts liked by the user
-      await Post.updateMany({ likes: userId }, { $pull: { likes: userId } });
-
-      // Delete all commentIds present in array Comment.likes
-      await Comment.updateMany({ likes: userId }, { $pull: { likes: userId } });
-
-      // Delete all comments made by the user that are present in Post.commentIds
-      const userComments = await Comment.find({ userId: userId });
-      const commentIdsToDelete = userComments.map((comment) => comment._id);
-
-      // Only now we can delete all comments made by the user
-      await Comment.deleteMany({ userId: userId });
-
-      await Post.updateMany(
-        { commentIds: { $in: commentIdsToDelete } },
-        { $pull: { commentIds: { $in: commentIdsToDelete } } }
-      );
 
       if (user.image) {
         const imagePath = path.join(
@@ -226,46 +194,6 @@ const UserController = {
         }
       }
       res.send({ message: `User ${user.username} deleted` });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error);
-    }
-  },
-
-  async follow(req, res) {
-    try {
-      const followerId = req.user._id;
-      const followingId = req.params.targetid;
-      // update user that hits follow button
-      const follower = await User.findByIdAndUpdate(followerId, {
-        $push: { following: followingId },
-      });
-      // update the user that is being followed
-      const following = await User.findByIdAndUpdate(followingId, {
-        $push: { followers: followerId },
-      });
-      res.send({ message: `User ${follower.username} is now following ${following.username}` });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error);
-    }
-  },
-
-  async unfollow(req, res) {
-    try {
-      const followerId = req.user._id;
-      const followingId = req.params.targetid;
-      // update user that hits UN-follow button
-      const follower = await User.findByIdAndUpdate(followerId, {
-        $pull: { following: followingId },
-      });
-      // update the user that is being UN-followed
-      const following = await User.findByIdAndUpdate(followingId, {
-        $pull: { followers: followerId },
-      });
-      res.send({
-        message: `User ${follower.username} no longer follows ${following.username}`,
-      });
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
