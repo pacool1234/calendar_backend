@@ -20,4 +20,4 @@ const authentication = async (req, res, next) => {
   }
 };
 
-module.exports = { authentication, isAuthor, isCommentAuthor };
+module.exports = { authentication };
