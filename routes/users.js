@@ -13,8 +13,6 @@ router.get("/resetPassword/:recoverToken", UserController.resetPassword);
 router.post("/create", uploadUserImg.single("image"), UserController.create);
 router.post("/login", UserController.login);
 router.put("/logout", authentication, UserController.logout);
-router.put("/follow/:targetid", authentication, UserController.follow);
-router.put("/unfollow/:targetid", authentication, UserController.unfollow);
 router.put("/update", uploadUserImg.single("image"), authentication, UserController.update);
 router.delete("/delete", authentication, UserController.delete);
 
