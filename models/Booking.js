@@ -8,9 +8,11 @@ const userId = {
 
 const bookingSchema = new mongoose.Schema(
   {
-    someField: {
-      type: String,
+    date: {
+      type: Date,
+      default: Date.now
     },
+    users: [ userId ],
   },
   { timestamps: true }
 );

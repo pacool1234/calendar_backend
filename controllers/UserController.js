@@ -16,7 +16,6 @@ const UserController = {
       if (req.file) {
         data = { ...req.body, image: req.file.filename }; //NOT: req.file.path!
       } else {
-        //PACO: ADDED THIS ELSE, or image will be saved as "undefined"
         delete data.image; 
       }
       const password = await bcrypt.hash(req.body.password, 10);
@@ -24,21 +23,21 @@ const UserController = {
         ...data,
         password: password,
         role: "user",
-        confirmed: false,
+        confirmed: true,
       });
-      const emailToken = jwt.sign(
-        { email: req.body.email },
-        process.env.JWT_SECRET,
-        { expiresIn: '48h' }
-      );
-      const url = `http://localhost:${PORT}/users/confirm/${emailToken}`;
-      await transporter.sendMail({
-        to: req.body.email,
-        subject: 'Confirmation email',
-        html: `<h3>Welcome, you are one step away from registering</h3>
-        <a href='${url}'>Click to confirm your email</a>
-        <p>Please, confirm your email within 48h</p>`
-      });
+      // const emailToken = jwt.sign(
+      //   { email: req.body.email },
+      //   process.env.JWT_SECRET,
+      //   { expiresIn: '48h' }
+      // );
+      // const url = `http://localhost:${PORT}/users/confirm/${emailToken}`;
+      // await transporter.sendMail({
+      //   to: req.body.email,
+      //   subject: 'Confirmation email',
+      //   html: `<h3>Welcome, you are one step away from registering</h3>
+      //   <a href='${url}'>Click to confirm your email</a>
+      //   <p>Please, confirm your email within 48h</p>`
+      // });
       res.status(201).send({ message: "User created", user });
     } catch (error) {
       console.error(error);
@@ -79,7 +78,7 @@ const UserController = {
 
       user.tokens.push(token);
       await user.save();
-      res.send({ token, _id: `${user._id}`, message: `Welcome ${user.username}` });
+      res.send({ token, _id: `${user._id}`, message: `Welcome ${user.name}` });
     } catch (error) {
       console.error(error);
       res.status(500).send(error);

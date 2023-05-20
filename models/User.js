@@ -8,20 +8,16 @@ const userId = {
 
 const userSchema = new mongoose.Schema(
   {
-    username: {
+    name: {
       type: String,
-      unique: true,
       required: [true, "Please introduce a username"],
     },
 
-    title: {
+    surname: {
       type: String,
+      required: [true, "Please introduce a username"],
     },
-
-    bio: {
-      type: String,
-    },
-
+    
     email: {
       type: String,
       match: [/.+\@.+\..+/, "Invalid email address format"],
@@ -41,6 +37,24 @@ const userSchema = new mongoose.Schema(
     confirmed: {
       type: Boolean,
     },
+
+    position: {
+      type: String,
+    },
+
+    company: {
+      type: String,
+    },
+
+    field: {
+      type: String,
+    },
+
+    matches: [ userId ],
+
+    meetings: [ userId ],
+    
+    bookings: [ userId ],
 
     image: String,
 
