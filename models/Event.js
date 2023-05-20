@@ -22,9 +22,18 @@ const EventSchema = new Schema({
         {
             type: Schema.Types.ObjectId,
             ref: 'User',
-            required: [true, 'Por favor, proporciona los usuarios confirmados para el evento']
         }
-    ]
+    ],
+    invited_users: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+        }
+    ],
+    image: {
+        type: String,
+        default: null
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', EventSchema);
