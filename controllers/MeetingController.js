@@ -9,10 +9,6 @@ const MeetingController = {
     try {
       req.body.hostId = req.user._id;
       req.body.assistants.push(req.user._id); // Must add ID of user who creates the meeting
-      console.log(req.body);
-      for (const x of req.body.assistants) {
-        console.log(x, typeof x);
-      }
       const meeting = await Meeting.create(req.body);
       req.body.assistants.forEach(async (id) => {
         await User.findByIdAndUpdate(id, { $push: { meetings: meeting._id }})
