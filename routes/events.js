@@ -28,8 +28,25 @@ router.put('/events/:id/cancel', authentication, eventsController.cancelAttendan
 // Ruta para invitar usuarios a un evento
 router.put('/events/:id/invite', authentication, eventsController.inviteUser);
 
-//Ruta para revocar la invitación de un usuario
+// Ruta para revocar la invitación de un usuario
 router.put('/events/:id/uninvite', authentication, eventsController.uninviteUser);
 
+// Ruta para obtener los eventos a los que un usuario ha confirmado asistencia
+router.get('/events/confirmed', authentication, eventsController.getEventsUserConfirmed);
+
+// Ruta para obtener los eventos a los que un usuario ha sido invitado
+router.get('/events/invited', authentication, eventsController.getEventsUserInvited);
+
+// Ruta para obtener los eventos futuros
+router.get('/events/future', authentication, eventsController.getFutureEvents);
+
+// Ruta para obtener los eventos pasados
+router.get('/events/past', authentication, eventsController.getPastEvents);
+
+// Ruta para añadir una reseña a un evento
+router.put('/events/:id/review', authentication, eventsController.addEventReview);
+
+// Ruta para añadir un comentario a un evento
+router.put('/events/:id/comment', authentication, eventsController.addEventComment);
 
 module.exports = router;
