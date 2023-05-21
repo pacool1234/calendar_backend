@@ -5,7 +5,8 @@ const router = express.Router();
 
 router.post("/create", authentication, BookingController.create);
 router.get("/getall", BookingController.getAll);
-router.get("/getbooking", BookingController.getBooking);
-router.delete("/delete", authentication, BookingController.delete);
+router.get("/getbydate", BookingController.getByDate);
+router.get("/getbyid/:_id", BookingController.getById);
+router.delete("/delete/:_id", authentication, BookingController.delete);
 
 module.exports = router;
