@@ -37,7 +37,7 @@ const BookingController = {
     }
   },
 
-  async getBooking(req, res) {
+  async getByDate(req, res) {
     try {
       const booking = await Booking.findOne({ date: req.body.date });
       if (!booking) {
@@ -50,24 +50,33 @@ const BookingController = {
     }
   },
 
+  async getById(req, res) {
+    try {
+      const booking = await Booking.findById(req.params._id);
+      if (!booking) {
+        return res.status(404).send({ message: 'No booking found' });
+      }
+      res.send(booking);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send(error);
+    }
+  },
+
   async delete(req, res) {
     try {
-      const regex = /(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}).*/;
-      const match = req.body.date.match(regex);
-      const [ _, date, time ] = match
-
-      const booking = await Booking.findOne({ date: req.body.date });
+      const booking = await Booking.findById(req.params._id);
       await User.findByIdAndUpdate(req.user._id, { $pull: { bookings: booking._id }})
+
       const arrayOfUsers = booking.users;
       if (arrayOfUsers.length === 1 && arrayOfUsers.includes(req.user._id)) {
         await Booking.findByIdAndDelete(booking._id);
-        return res.send({ message: `You cancelled your booking on ${date} @ ${time}` });
+        return res.send({ message: `You cancelled your booking on ${booking.date}` });
       }
+      
       const filteredArrayOfUsers = arrayOfUsers.filter(id => !id.equals(req.user._id)); // use the equals method provided by mongoose ObjectId
-      console.log(filteredArrayOfUsers);
-
       await Booking.findByIdAndUpdate(booking._id, { users: filteredArrayOfUsers }, { new: true });
-      res.send({ message: `You cancelled your booking on ${date} @ ${time}` });
+      res.send({ message: `You cancelled your booking on ${booking.date}` });
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
