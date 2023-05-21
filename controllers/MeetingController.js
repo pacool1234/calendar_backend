@@ -1,26 +1,23 @@
 const mongoose = require("mongoose");
 const transporter = require("../config/nodemailer");
-const Booking = require("../models/Booking");
+const Meeting = require("../models/Meeting");
 const User = require("../models/User");
 
 
-const BookingController = {
+const MeetingController = {
   async create(req, res) {
     try {
-      const bookingExists = await Booking.findOne({ date: req.body.date });
-      if (bookingExists) {
-        const arrayOfUsers = bookingExists.users;
-        if (arrayOfUsers.includes(req.user._id)) {
-          return res.send({ message: "You already booked this timestamp", bookingExists });
-        }
-        const updatedBooking = await Booking.findByIdAndUpdate(bookingExists._id, { $push: { users: req.user._id }}, { new: true });
-        await User.findByIdAndUpdate(req.user._id, { $push: { bookings: bookingExists._id }})
-        return res.send({ message: "You joined this previously created timestamp", updatedBooking });
+      req.body.hostId = req.user._id;
+      req.body.assistants.push(req.user._id); // Must add ID of user who creates the meeting
+      console.log(req.body);
+      for (const x of req.body.assistants) {
+        console.log(x, typeof x);
       }
-      req.body.users = [req.user._id] // Must add ID of user who books a given time for the 1st time
-      const newBooking = await Booking.create(req.body);
-      await User.findByIdAndUpdate(req.user._id, { $push: { bookings: newBooking._id }})
-      res.status(201).send({ message: "Booking created", newBooking });
+      const meeting = await Meeting.create(req.body);
+      req.body.assistants.forEach(async (id) => {
+        await User.findByIdAndUpdate(id, { $push: { meetings: meeting._id }})
+      });
+      res.status(201).send({ message: "Meeting created", meeting });
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
@@ -29,21 +26,21 @@ const BookingController = {
 
   async getAll(req, res) {
     try {
-      const bookings = await Booking.find();
-      res.send(bookings);
+      const meetings = await Meeting.find();
+      res.send(meetings);
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
     }
   },
 
-  async getBooking(req, res) {
+  async getByDate(req, res) {
     try {
-      const booking = await Booking.findOne({ date: req.body.date });
-      if (!booking) {
-        return res.status(404).send({ message: 'No booking found for this timestamp' });
+      const meeting = await Meeting.findOne({ date: req.body.date });
+      if (!meeting) {
+        return res.status(404).send({ message: 'No meeting found for this timestamp' });
       }
-      res.send(booking);
+      res.send(meeting);
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
@@ -75,4 +72,4 @@ const BookingController = {
   },
 };
 
-module.exports = BookingController;
+module.exports = MeetingController;
