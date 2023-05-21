@@ -140,10 +140,97 @@ exports.uninviteUser = async (req, res) => {
     }
 };
 
+// Controlador para obtener eventos a los que un usuario ha confirmado asistencia
+exports.getEventsUserConfirmed = async (req, res) => {
+    try {
+        const events = await Event.find({confirmed_users: req.user._id});
+        res.send(events);
+    } catch (error) {
+        res.status(500).send();
+    }
+};
+
+// Controlador para obtener eventos a los que un usuario ha sido invitado
+exports.getEventsUserInvited = async (req, res) => {
+    try {
+        const events = await Event.find({invited_users: req.user._id});
+        res.send(events);
+    } catch (error) {
+        res.status(500).send();
+    }
+};
+
+// Controlador para obtener eventos futuros
+exports.getFutureEvents = async (req, res) => {
+    try {
+        const events = await Event.find({date: {$gte: new Date()}});
+        res.send(events);
+    } catch (error) {
+        res.status(500).send();
+    }
+};
+
+// Controlador para obtener eventos pasados
+exports.getPastEvents = async (req, res) => {
+    try {
+        const events = await Event.find({date: {$lt: new Date()}});
+        res.send(events);
+    } catch (error) {
+        res.status(500).send();
+    }
+};
+
+// Controlador para añadir una valoración y reseña a un evento
+exports.addEventReview = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) {
+            return res.status(404).send();
+        }
+        event.reviews.push({
+            userId: req.user._id,
+            rating: req.body.rating,
+            review: req.body.review
+        });
+        await event.save();
+        res.send(event);
+    } catch (error) {
+        res.status(500).send();
+    }
+};
+
+// Controlador para añadir un comentario a un evento
+exports.addEventComment = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) {
+            return res.status(404).send();
+        }
+        event.comments.push({
+            userId: req.user._id,
+            comment: req.body.comment
+        });
+        await event.save();
+        res.send(event);
+    } catch (error) {
+        res.status(500).send();
+    }
+};
+
 module.exports = {
-    // tus otros exportaciones aquí...
+    createEvent,
+    getEvents,
+    getEventById,
+    updateEvent,
+    deleteEvent,
     confirmAttendance,
     cancelAttendance,
     inviteUser,
     uninviteUser,
+    getEventsUserConfirmed,
+    getEventsUserInvited,
+    getFutureEvents,
+    getPastEvents,
+    addEventReview,
+    addEventComment,
 };
