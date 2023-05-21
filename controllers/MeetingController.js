@@ -63,6 +63,7 @@ const MeetingController = {
 
       meeting.assistants.forEach(async (id) => {
         await User.findByIdAndUpdate(id, { $pull: { meetings: meeting._id }});
+        // How to notify to all assistants?
       });
 
       await Meeting.findByIdAndDelete(meeting._id);

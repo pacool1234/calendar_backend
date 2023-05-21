@@ -15,8 +15,18 @@ const BookingController = {
         }
         const updatedBooking = await Booking.findByIdAndUpdate(bookingExists._id, { $push: { users: req.user._id }}, { new: true });
         await User.findByIdAndUpdate(req.user._id, { $push: { bookings: bookingExists._id }})
-        return res.send({ message: "You joined this previously created timestamp", updatedBooking });
+        // After a user joins a timestamp, processes which users already present match with the said user
+        const userCreator = await User.findById(req.user._id); // bring creator's matches
+        arrayOfUsers.forEach(user => {
+          if (userCreator.matches.includes(user)) {
+            console.log('h');
+          }
+        });
+
+
+        return res.send({ message: "You just joined this previously created timestamp. All good", updatedBooking });
       }
+      // Below: case when user is 1st one to book that timestamp
       req.body.users = [req.user._id] // Must add ID of user who books a given time for the 1st time
       const newBooking = await Booking.create(req.body);
       await User.findByIdAndUpdate(req.user._id, { $push: { bookings: newBooking._id }})

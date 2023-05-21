@@ -6,6 +6,12 @@ const userId = {
   ref: "User",
 };
 
+const matchingUsersSchema = new mongoose.Schema(
+  {
+    date: [ userId ]
+  }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -55,6 +61,8 @@ const userSchema = new mongoose.Schema(
     meetings: [ userId ],
     
     bookings: [ userId ],
+
+    matchingUsers: matchingUsersSchema,
 
     image: String,
 
