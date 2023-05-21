@@ -66,6 +66,7 @@ const BookingController = {
   async delete(req, res) {
     try {
       const booking = await Booking.findById(req.params._id);
+      
       await User.findByIdAndUpdate(req.user._id, { $pull: { bookings: booking._id }})
 
       const arrayOfUsers = booking.users;

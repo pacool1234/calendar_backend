@@ -6,6 +6,7 @@ const router = express.Router();
 router.post("/create", authentication, MeetingController.create);
 router.get("/getall", MeetingController.getAll);
 router.get("/getbydate", MeetingController.getByDate);
-router.delete("/delete", authentication, MeetingController.delete);
+router.get("/getbyid/:_id", MeetingController.getById);
+router.delete("/delete/:_id", authentication, MeetingController.delete);
 
 module.exports = router;
