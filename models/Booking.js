@@ -18,9 +18,8 @@ const bookingSchema = new mongoose.Schema(
 );
 
 bookingSchema.methods.toJSON = function () {
-  const user = this._doc;
-  delete user.password;
-  return user;
+  const booking = this._doc;
+  return booking;
 };
 
 const Booking = mongoose.model("Booking", bookingSchema);

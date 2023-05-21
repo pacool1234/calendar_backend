@@ -13,6 +13,7 @@ app.use(express.static("./public")); //Necessary to get correct url in frontend
 
 app.use("/users", require("./routes/users"));
 app.use("/bookings", require("./routes/bookings"));
+app.use("/meetings", require("./routes/meetings"));
 
 
 dbConnection();
