@@ -20,5 +20,7 @@ router.put('/:id/invite', authentication, eventsController.inviteUser);
 router.put('/:id/uninvite', authentication, eventsController.uninviteUser);
 router.put('/:id/review', authentication, eventsController.addEventReview);
 router.delete('/:id', authentication, eventsController.deleteEvent);
+router.get('/name/:name', authentication, eventsController.getEventByName);
+
 
 module.exports = router;
