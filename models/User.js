@@ -6,11 +6,6 @@ const userId = {
   ref: "User",
 };
 
-const matchingUsersSchema = new mongoose.Schema(
-  {
-    date: [ userId ]
-  }
-);
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,7 +18,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please introduce a username"],
     },
-    
+
     email: {
       type: String,
       match: [/.+\@.+\..+/, "Invalid email address format"],
@@ -56,24 +51,24 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
 
-    matches: [ userId ],
+    matches: [userId],
 
-    meetings: [ userId ],
-    
-    bookings: [ userId ],
+    meetings: [userId],
 
-    matchingUsers: matchingUsersSchema,
+    bookings: [userId],
+
+    bookingMatchingUsers: { 
+      type: Array 
+    },
 
     image: String,
 
-    tokens: [
-      { type: String },
-    ],
+    tokens: [{ type: String }],
   },
   { timestamps: true }
 );
 
-userSchema.index({ username: "text" });
+userSchema.index({ name: "text" });
 
 userSchema.methods.toJSON = function () {
   const user = this._doc;

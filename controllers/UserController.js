@@ -103,14 +103,7 @@ const UserController = {
   async update(req, res) {
     try {
       let data = { ...req.body };
-      if (req.body.username) {
-        let usernameAlreadyTaken = await User.exists({
-          username: req.body.username,
-        });
-        if (usernameAlreadyTaken) {
-          return res.status(400).send({ message: `username ${req.body.username} already in use` });
-        }
-      }
+    
       if (req.body.password) {
         const newPassword = await bcrypt.hash(req.body.password, 10);
         data.password = newPassword;
@@ -127,9 +120,11 @@ const UserController = {
       } else {
         delete data.image;
       }
-      delete data.email;
+
+      delete data.email; // make sure that user cannot change email address
+
       const user = await User.findByIdAndUpdate(req.user._id, data, { new: true });
-      res.send({ message: `User ${user.username} updated`, x: req.file, pw: data.password });
+      res.send({ message: `User ${user.name} updated`, user });
     } catch (error) {
       console.error(error);
       res.status(500).send(error);
@@ -150,14 +145,6 @@ const UserController = {
     try {
       const userId = new mongoose.Types.ObjectId(req.params._id);
       const user = await User.findById({ _id: userId })
-        .populate({
-          path: "following",
-          select: "username image",
-        })
-        .populate({
-          path: "followers",
-          select: "username image",
-        });
       res.send(user);
     } catch (error) {
       console.error(error);
@@ -165,10 +152,10 @@ const UserController = {
     }
   },
 
-  async getByUsername(req, res) {
+  async getByName(req, res) {
     try {
       const users = await User.find({
-        username: { $regex: ".*" + req.params.username + ".*" },
+        username: { $regex: ".*" + req.params.name + ".*" },
       });
       res.send(users);
     } catch (error) {

@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/getall", UserController.getAll);
 router.get("/getbyid/:_id", UserController.getById);
-router.get("/getbyusername/:username", UserController.getByUsername);
+router.get("/getbyname/:name", UserController.getByName);
 router.get("/confirm/:emailToken", UserController.confirm);
 router.get("/recoverPassword/:email", UserController.recoverPassword);
 router.get("/resetPassword/:recoverToken", UserController.resetPassword);
