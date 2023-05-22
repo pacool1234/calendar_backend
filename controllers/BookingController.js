@@ -25,9 +25,9 @@ const BookingController = {
         });
 
         // After a user joins a timestamp, then, process which users already present match with the said user
-        const userCreator = await User.findById(req.user._id); // bring creator's matches
+        const userLeaving = await User.findById(req.user._id); // bring creator's matches
         arrayOfUsers.forEach(async (id) => {
-          if (userCreator.matches.includes(id)) {
+          if (userLeaving.matches.includes(id)) {
             const documentFromMatch = await User.findOne({
               _id: id,
               "bookingMatchingUsers.date": bookingExists.date,
@@ -52,14 +52,17 @@ const BookingController = {
               );
             }
 
-            const documentFromCreator = await User.findOne({ 
+            const documentFromCreator = await User.findOne({
               _id: req.user._id,
-              "bookingMatchingUsers.date": bookingExists.date
+              "bookingMatchingUsers.date": bookingExists.date,
             });
             if (documentFromCreator) {
               await User.updateOne(
-                { _id: req.user._id, "bookingMatchingUsers.date": bookingExists.date },
-                { $addToSet: { "bookingMatchingUsers.$.users": id } },
+                {
+                  _id: req.user._id,
+                  "bookingMatchingUsers.date": bookingExists.date,
+                },
+                { $addToSet: { "bookingMatchingUsers.$.users": id } }
               );
             } else {
               // User has NO booking for that timestamp, create one
@@ -72,10 +75,10 @@ const BookingController = {
                       users: [id],
                     },
                   },
-                },
+                }
               );
             }
-          };
+          }
         });
         return res.send({
           message:
@@ -137,6 +140,10 @@ const BookingController = {
     try {
       const booking = await Booking.findById(req.params._id);
 
+      if (!booking) {
+        return res.status(404).send({ message: "Booking not found" });
+      }
+
       await User.findByIdAndUpdate(req.user._id, {
         $pull: { bookings: booking._id },
       });
@@ -144,19 +151,48 @@ const BookingController = {
       const arrayOfUsers = booking.users;
       if (arrayOfUsers.length === 1 && arrayOfUsers.includes(req.user._id)) {
         await Booking.findByIdAndDelete(booking._id);
-        return res.send({
-          message: `You cancelled your booking on ${booking.date}`,
-        });
+      } else {
+        const filteredArrayOfUsers = arrayOfUsers.filter(
+          (id) => !id.equals(req.user._id) // use the equals method provided by mongoose ObjectId
+        ); 
+        await Booking.findByIdAndUpdate(
+          booking._id,
+          { users: filteredArrayOfUsers },
+          { new: true }
+        );
       }
+      
 
-      const filteredArrayOfUsers = arrayOfUsers.filter(
-        (id) => !id.equals(req.user._id)
-      ); // use the equals method provided by mongoose ObjectId
-      await Booking.findByIdAndUpdate(
-        booking._id,
-        { users: filteredArrayOfUsers },
-        { new: true }
-      );
+      // After a user abandons a timestamp, then, pull them out from bookingMatchingUsers array from remaining users
+      const userLeaving = await User.findById(req.user._id); // bring leaver's matches
+      arrayOfUsers.forEach(async (id) => {
+        if (userLeaving.matches.includes(id)) {
+          const documentFromMatch = await User.findOne({
+            _id: id,
+            "bookingMatchingUsers.date": booking.date,
+          });
+          if (documentFromMatch) {
+            await User.updateOne(
+              { _id: id, "bookingMatchingUsers.date": booking.date },
+              { $pull: { "bookingMatchingUsers.$.users": req.user._id } }
+            );
+          } 
+
+          const documentFromCreator = await User.findOne({
+            _id: req.user._id,
+            "bookingMatchingUsers.date": booking.date,
+          });
+          if (documentFromCreator) {
+            await User.updateOne(
+              {
+                _id: req.user._id,
+                "bookingMatchingUsers.date": booking.date,
+              },
+              { $pull: { "bookingMatchingUsers.$.users": id } }
+            );
+          }
+        }
+      });
       res.send({ message: `You cancelled your booking on ${booking.date}` });
     } catch (error) {
       console.error(error);
